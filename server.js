@@ -1,5 +1,6 @@
 const express = require("express");
 const mongojs = require("mongojs");
+const mongoose = require("mongoose");
 
 const app = express();
 
@@ -7,6 +8,10 @@ const databaseUrl = "workout";
 const collections = ["exercises"];
 
 const db = mongojs(databaseUrl, collections);
+
+app.use(express.static("public"));
+
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workout", { useNewUrlParser: true });
 
 db.on("error", error => {
     console.log("Database Error:", error);
