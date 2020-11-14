@@ -1,19 +1,17 @@
 const express = require("express");
 const mongojs = require("mongojs");
-const mongoose = require("mongoose");
+const logger = require("morgan");
 
 const app = express();
 
+const databaseUrl = "workout";
+const collections = ["workouts"];
+const db = mongojs(databaseUrl, collections);
+
+app.use(logger("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
-
-const databaseUrl = "workout";
-const collections = ["exercises"];
-
-const db = mongojs(databaseUrl, collections);
-
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workout", { useNewUrlParser: true });
 
 db.on("error", error => {
     console.log("Database Error:", error);
@@ -24,7 +22,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/all", (req, res) => {
-    db.workout.find({}, (err, data) => {
+    db.workouts.find({}, (err, data) => {
         if (err) {
             console.log(err);
         } else {
