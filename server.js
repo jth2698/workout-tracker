@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const mongojs = require("mongojs");
 const logger = require("morgan");
 
@@ -17,8 +18,12 @@ db.on("error", error => {
     console.log("Database Error:", error);
 });
 
-app.get("/", (req, res) => {
-    res.send("Hello world");
+app.get("/exercise", (req, res) => {
+    res.sendFile(path.join(__dirname, "./public/exercise.html"));
+});
+
+app.get("/stats", (req, res) => {
+    res.sendFile(path.join(__dirname, "./public/stats.html"));
 });
 
 app.get("/all", (req, res) => {
