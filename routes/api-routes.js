@@ -11,20 +11,54 @@ db.on("error", error => {
 module.exports = (app) => {
 
     // Utility AP to view all workouts in database
-    app.get("/api/workouts/", (req, res) => {
-        db.workouts.find({}, (error, found) => {
+    app.post("/api/workouts/", (req, res) =>
+
+        db.workouts.save({}, (error, newWorkout) => {
             if (error) {
                 console.log(error);
             } else {
-                res.json(found);
+                console.log("Fetched all workouts");
             }
-        });
-    });
+        })
+    );
 
     app.put("/api/workouts/:id", (req, res) => {
-        console.log(req.body);
-        db.workouts.save(req.body);
-    });
+        if (req.body.type === "resistance") {
+            db.workouts.update({
+                _id: mongojs.ObjectId(req.params.id)
+            }, {
+                $set: {
+                    exercises: [
+                        {
+                            type: req.body.type,
+                            name: req.body.name,
+                            duration: req.body.duration,
+                            weight: req.body.weight,
+                            reps: req.body.reps,
+                            sets: req.body.sets
+                        }
+                    ]
+                }
+            })
+        }
+        if (req.body.type === "cardio") {
+            db.workouts.update({
+                _id: mongojs.ObjectId(req.params.id)
+            }, {
+                $set: {
+                    exercises: [
+                        {
+                            type: req.body.type,
+                            name: req.body.name,
+                            duration: req.body.duration,
+                            distance: req.body.distance
+                        }
+                    ]
+                }
+            })
+        }
+    })
+
 
     app.get("/api/workouts/range", (req, res) => {
         db.workouts.find({}, (error, found) => {
