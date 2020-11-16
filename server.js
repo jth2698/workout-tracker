@@ -1,5 +1,4 @@
 const express = require("express");
-const path = require("path");
 const mongojs = require("mongojs");
 const logger = require("morgan");
 
@@ -14,27 +13,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
 
+require("./routes/html-routes")(app);
+require("./routes/api-routes")(app);
+
 db.on("error", error => {
     console.log("Database Error:", error);
 });
 
-app.get("/exercise", (req, res) => {
-    res.sendFile(path.join(__dirname, "./public/exercise.html"));
-});
-
-app.get("/stats", (req, res) => {
-    res.sendFile(path.join(__dirname, "./public/stats.html"));
-});
-
-app.get("/all", (req, res) => {
-    db.workouts.find({}, (err, data) => {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(data);
-        }
-    });
-});
+app.put("/api/workouts/:id", (req, res) => {
+    console.log(req.body);
+    db.workouts.save(req.body);
+})
 
 // Set the app to listen on port 3000
 app.listen(3000, () => {
