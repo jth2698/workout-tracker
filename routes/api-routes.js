@@ -1,72 +1,71 @@
-const mongojs = require("mongojs");
+//requiring the models folder with the Workout model
+const db = require("../models");
 
-const databaseUrl = "workout";
-const collections = ["workouts"];
-const db = mongojs(databaseUrl, collections);
-
-db.on("error", error => {
-    console.log("Database Error:", error);
-});
-
+//exporting the api routes as an arrow function
 module.exports = (app) => {
-
-    // Utility AP to view all workouts in database
-    app.post("/api/workouts/", (req, res) =>
-
-        db.workouts.save({}, (error, newWorkout) => {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log("Fetched all workouts");
-            }
-        })
-    );
-
-    app.put("/api/workouts/:id", (req, res) => {
-        if (req.body.type === "resistance") {
-            db.workouts.update({
-                _id: mongojs.ObjectId(req.params.id)
-            }, {
-                $set: {
-                    exercises: [
-                        {
-                            type: req.body.type,
-                            name: req.body.name,
-                            duration: req.body.duration,
-                            weight: req.body.weight,
-                            reps: req.body.reps,
-                            sets: req.body.sets
-                        }
-                    ]
-                }
+    //@route    GET /api/workouts
+    //@desc     get all workouts
+    //@access   Public
+    app.get("/api/workouts", (req, res) => {
+        //find all workouts
+        db.Workout.find({})
+            //return as json
+            .then((workout) => {
+                res.json(workout);
             })
-        }
-        if (req.body.type === "cardio") {
-            db.workouts.update({
-                _id: mongojs.ObjectId(req.params.id)
-            }, {
-                $set: {
-                    exercises: [
-                        {
-                            type: req.body.type,
-                            name: req.body.name,
-                            duration: req.body.duration,
-                            distance: req.body.distance
-                        }
-                    ]
-                }
-            })
-        }
-    })
-
-
-    app.get("/api/workouts/range", (req, res) => {
-        db.workouts.find({}, (error, found) => {
-            if (error) {
-                console.log(error);
-            } else {
-                res.json(found);
-            }
-        });
+            .catch((err) => res.json(err));
     });
-}
+
+    //@route    POST /api/workouts
+    //@desc     create new workout
+    //@access   Public
+    app.post("/api/workouts", (req, res) => {
+        //create new exercise in a workout
+        db.Workout.create({})
+            //return as json
+            .then((newWorkout) => {
+                res.json(newWorkout);
+            })
+            .catch((err) => res.json(err));
+    });
+
+    //@route    PUT /api/workouts/:id
+    //@desc     update existing workout
+    //@access   Public
+    app.put("/api/workouts/:id", ({ params, body }, res) => {
+        //find by id and update
+        db.Workout.findByIdAndUpdate(
+            //giving the _id for mongo from the params passed in through the URL
+            { _id: params.id },
+            //mongo command to push an exercise onto the workout
+            { $push: { exercises: body } }
+        )
+            //promise to return the updated workout as json
+            .then((updatedWorkout) => {
+                res.json(updatedWorkout);
+            })
+            .catch((err) => res.json(err));
+    });
+
+    //@route    GET /api/workouts/range
+    //@desc     update existing workout
+    //@access   Public
+    app.get("/api/workouts/range", (req, res) => {
+        //find all workouts from mongo to display in workout dashboard
+        db.Workout.find({})
+            //return as JSON
+            .then((workout) => {
+                res.json(workout);
+            })
+            .catch((err) => res.json(err));
+    });
+
+    //@route    PUT /api/workouts/:id
+    //@desc     update existing workout
+    //@access   Public
+    app.post("/api/workouts/range", (req, res) => {
+        db.Workout.create({})
+            .then((data) => res.json(data))
+            .catch((err) => res.json(err));
+    });
+};
